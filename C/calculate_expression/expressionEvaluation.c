@@ -12,8 +12,8 @@
 /**
  * the status of the program
  * INIT 	: 	initialization
- * OPERATOR :	just getting a operator
- * OPERAND 	:	just getting a operand
+ * OPERATOR :	just getting an operator
+ * OPERAND 	:	just getting an operand
  */
 #define INIT 	 0
 #define OPERATOR 1
@@ -308,7 +308,7 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
 								return FAILED;
 							}
 							if (isOperator(prev_ch)) {
-								/* the prev_ch of ')' is a operator. a operator immediately follows ')' */
+								/* the prev_ch of ')' is an operator. an operator immediately follows ')' */
 								printf("Wrong expression!! No operand between the '%c' and ')'.\n", prev_ch);
 								printErrorIndex(infixExpressionHead, prev_index, infix_index, 2);
 								DestroyStack(s);
