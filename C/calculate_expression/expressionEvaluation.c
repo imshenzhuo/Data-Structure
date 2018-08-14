@@ -42,7 +42,7 @@ char *getNumber(char *infixExpression, char postfixExpression[], int *post_index
  * @param    post_index               postfixExpression
  * @return                            the point of infixExpression after getting a number
  */
-char *getLeftBrace(SequentialStackChar *s, char *infixExpression, char postfixExpression[], int *post_index);
+char *findLeftBrace(SequentialStackChar *s, char *infixExpression, char postfixExpression[], int *post_index);
 
 
 /**
@@ -68,28 +68,6 @@ int isOperator(char ch);
 
 
 /**
- * get the next char that is not a space character
- * @Author   shenzhuo
- * @DateTime 2018-07-31T16:11:16+0800
- * @param    infixExpression          [description]
- * @param    infixExpressionHead      [description]
- * @return                            [description]
- */
-char getPrevChar(char *infixExpression, char *infixExpressionHead);
-
-
-/**
- * get the next char that is not a space character
- * @Author   shenzhuo
- * @DateTime 2018-07-31T16:11:16+0800
- * @param    infixExpression          [description]
- * @param    infixExpressionHead      [description]
- * @return                            [description]
- */
-char getNextChar(char *infixExpression, int *next_index);
-
-
-/**
  * print the position in the expression
  * @Author   shenzhuo
  * @DateTime 2018-08-10T15:25:31+0800
@@ -102,18 +80,6 @@ void printErrorIndex(char *infixExpression, int t1, int t2, int count);
 
 
 /**
- * get the index of next char
- * @Author   shenzhuo
- * @DateTime 2018-08-10T15:26:03+0800
- * @param    infixExpressionHead      [description]
- * @param    infixExpression          [description]
- * @param    curr_index               [description]
- * @return                            [description]
- */
-int getPrevCharIndex(char *infixExpressionHead, char *infixExpression, int curr_index);
-
-
-/**
  * try to find matched right brace
  * @Author   shenzhuo
  * @DateTime 2018-08-10T15:26:08+0800
@@ -122,16 +88,6 @@ int getPrevCharIndex(char *infixExpressionHead, char *infixExpression, int curr_
  */
 int findRightBrace(char *infixExpression);
 
-
-/**
- * get the last char in the infix expression
- * @Author   shenzhuo
- * @DateTime 2018-08-10T15:03:33+0800
- * @param    infixExpression          [description]
- * @param    curr_index               [description]
- * @return                            [description]
- */
-int getLastCharIndex(char *infixExpression, int curr_index);
 
 
 /**
@@ -153,12 +109,12 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
 		return FAILED;
 	}
 	InitStack(s);
-	while (*infixExpression != '\0') {							/*	for every char in infixExpression */
-		char ch = *infixExpression;
-		if (isdigit(ch)) {
+    char ch;
+    char prev_ch = '\0';                                        /* save prev char in infix expression */
+    int prev_index = -1;
+	while ( (ch = *infixExpression) != '\0') {							/*	for every char in infixExpression */
+        if (isdigit(ch)) {
 			if (status == OPERAND)	{							/*	the status should be OPERATOR, it means just getting a number 	*/
-				int prev_index = getPrevCharIndex(infixExpressionHead, infixExpression-1, infix_index-1);
-				char prev_ch = getPrevChar(infixExpression, infixExpressionHead);
 				if (')' == prev_ch)								/*	a number immediately follows ')' in the expression.*/
 					printf("Wrong expression!! No operator between a number and ')'\n");
 				else											/*	two consecutive operands */
@@ -170,14 +126,10 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
 			status = OPERAND;									/*	update the status and get the complete number */
 			infixExpression = getNumber(infixExpression, postfixExpression, &post_index, &infix_index);
 		} else {												/*	get the indexes and values of the prev_char and the next_char of ch */
-			int prev_index = getPrevCharIndex(infixExpressionHead, infixExpression-1, infix_index-1);
-			char prev_ch = getPrevChar(infixExpression, infixExpressionHead);
-			int next_index = infix_index;
-			char next_ch = getNextChar(infixExpression, &next_index);
 			switch (ch) {
-				case ' ':
-				case '\t':	break;								/*	skip the space */
-				case '(':	if ( (isdigit(prev_ch)) ) {			/* 	the '(' immediately follows a number */
+				case ' ':   
+				case '\t':  break;								/*	skip the space */
+				case '(':   if ((isdigit(prev_ch)) ) {			/* 	the '(' immediately follows a number */
 								printf("Wrong expression!! No operator between a number and '('.\n");
 								printErrorIndex(infixExpressionHead, infix_index, prev_index, 2);
 								DestroyStack(s);
@@ -188,32 +140,7 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
 								DestroyStack(s);
 								return FAILED;
 							}
-							if (!isdigit(next_ch)) {			/*	check the next char of '(' */	
-								if ('*' == next_ch || '/' == next_ch) {
-									/* 	the '*' or the '/' immediately follows '(' */
-									printf("Wrong expression!! No operand between '(' and '%c'.\n", next_ch);
-									printErrorIndex(infixExpressionHead, infix_index, next_index, 2);
-									DestroyStack(s);
-									return FAILED;
-								} else if (next_ch == '-' || next_ch == '+') {		
-									/* may be the unary operator or the lack of operand here. */
-									char tmp = *(infixExpressionHead+next_index+1);
-									if (!isdigit(tmp)) {
-										if (isspace(tmp)){
-											printf("Wrong expression!! A space follows a unary '%c'.\n", next_ch);
-											printErrorIndex(infixExpressionHead, next_index, next_index, 1);
-											DestroyStack(s);
-											return FAILED;
-										}
-										else if (tmp != '('){
-											printf("Wrong expression!! No operand between '(' and '%c'.\n", next_ch);
-											printErrorIndex(infixExpressionHead, infix_index, next_index, 2);
-											DestroyStack(s);
-											return FAILED;
-										}
-									}
-								}
-							}
+							
 							/* check the matched ')' after current '(' */
 							if (!findRightBrace(infixExpression)) {	
 								printf("Wrong expression!! No matched ')' after '('.\n");
@@ -228,49 +155,34 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
 							break;
 				case '+':
 				case '-':	/* check the prev_ch of ch */
-							if (status == OPERATOR && isOperator(prev_ch)) {
-								/* two consecutive operators */
-								printf("Wrong expression!! Opreator '%c' immediately follows '%c' in the expression.\n", ch, prev_ch);
-								printErrorIndex(infixExpressionHead, infix_index, prev_index, 2);
-								return FAILED;
-							}
 							if (prev_ch == '(' || prev_ch == '!'|| prev_ch == '\0'){
-								/**
-								 * '+/-' may be a unary operator if it is the first not space character 
-								 * in the expression or the first non space character after '('. 
-								 */
-								next_ch = *(infixExpression+1);
-								if (isdigit(next_ch) || '(' == next_ch) {
-									/* a digit immediately follows '+/-', which shows '+/-' is a unary operator */
-									if (ch == '-')	{
-										/* '$' represents unary '-' */
-										if(FAILED == Push(s, '$'))	{
-											return FAILED;
-										}		
-									}
-									else {
-										/* '@' represents unary '+' */
-										if(FAILED == Push(s, '@'))	{
-											return FAILED;
-										}
-									}
-									break;
-								}else if(isOperator(next_ch)){
-									/* two consecutive operators */
-									printf("Wrong expression!! Operator '%c' immediately follows '%c' in the expression.\n", next_ch, ch);
-									printErrorIndex(infixExpressionHead, next_index, infix_index, 2);
-									return FAILED;
-								}else if( (next_ch == ' ' || next_ch == '\0') && ch == '+'){
-									/* No space is available after the unit operator is specified */
-									printf("Wrong expression!! A space follows a unary plus.\n");
-									printErrorIndex(infixExpressionHead, infix_index, 0, 1);
-									return FAILED;
-								}else if((next_ch == ' ' || next_ch == '\0') && (ch == '-')) {
-									printf("Wrong expression!! A space follows a unary minus.\n");
-									printErrorIndex(infixExpressionHead, infix_index, 0, 1);
-									return FAILED;
-								}
-							}else {
+                                // unary operator
+                                if ( isspace(*(infixExpression+1)) ) {
+                                    if ('-' == ch)  printf("Wrong expression!! A space follows a unary minus.\n");
+                                    else    printf("Wrong expression!! A space follows a unary plus.\n");
+                                    printErrorIndex(infixExpressionHead, infix_index, 0, 1);
+                                    return FAILED;
+                                }
+                                if (ch == '-')  {
+                                    /* '$' represents unary '-' */
+                                    if(FAILED == Push(s, '$'))  {
+                                        return FAILED;
+                                    }    
+                                }
+                                else {
+                                    /* '@' represents unary '+' */
+                                    if(FAILED == Push(s, '@'))  {
+                                        return FAILED;
+                                    }
+                                }
+                                status = OPERATOR;
+                                break;
+							} else if (isOperator(prev_ch)) {
+                                printf("Wrong expression!! Opreator '%c' immediately follows '%c' in the expression.\n", ch, prev_ch);
+                                printErrorIndex(infixExpressionHead, infix_index, prev_index, 2);
+                                DestroyStack(s);
+                                return FAILED;
+                            } else {
 								/* pop the operators with the same priority or high priority */
 								PopPriority(postfixExpression, &post_index, s, ch);
 								if (FAILED == Push(s, ch)) {
@@ -281,14 +193,15 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
 							}
 				case '*' :
 				case '/' :	/* '*' or '/' can not appear in the first */
-							if (status == INIT || '!' == prev_ch) {
+							if (status == INIT || '!' == prev_ch || '(' == prev_ch || '\0' == prev_ch) {
 								printf("Wrong expression!! No operand before the '%c'.\n", ch);
 								printErrorIndex(infixExpressionHead,infix_index,-1,1);
 								DestroyStack(s);
 								return FAILED;
 							}
 							/* two consecutive operators */
-							if (status == OPERATOR){
+							// if (status == OPERATOR){
+                            if (isOperator(prev_ch)) {
 								printf("Wrong expression!! Opreator '%c' immediately follows '%c' in the expression.\n", ch, prev_ch);
 								printErrorIndex(infixExpressionHead, infix_index, prev_index, 2);
 								DestroyStack(s);
@@ -296,7 +209,7 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
 							}
 							/* pop the operators with the same priority or high priority */
 							PopPriority(postfixExpression, &post_index, s, ch);
-							if(FAILED == Push(s, ch)) {
+							if (FAILED == Push(s, ch)) {
 								return FAILED;
 							}	
 							status = OPERATOR;
@@ -316,7 +229,7 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
 								return FAILED;
 							}
 							/* find the matched '(' before ch */
-							infixExpression = getLeftBrace(s, infixExpression, postfixExpression, &post_index);
+							infixExpression = findLeftBrace(s, infixExpression, postfixExpression, &post_index);
 							if (infixExpression == NULL)	{
 								printf("Wrong expression. No matched '(' before ')'\n");
 								printErrorIndex(infixExpressionHead, infix_index, 1, 1);
@@ -336,15 +249,19 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
 			}
 			infixExpression++;
 		}
-		infix_index++;
-	}
+	    if (!isspace(ch)) {
+            prev_ch = ch;
+            prev_index = infix_index;
+        }
+        infix_index++;  
+    }
 	
 	/* check the rest of char in the stack */
 	if (status == OPERATOR) {
 		/* status should be OPERAND, something wrong happened */
 		printf("Wrong expression!! No operand after the '%c' in the expression.\n", s->data[s->top]);
-		int err_index = getLastCharIndex(infixExpressionHead, infix_index);
-		printErrorIndex(infixExpressionHead, err_index, -1, 1);
+		// int err_index = getLastCharIndex(infixExpressionHead, infix_index);
+		// printErrorIndex(infixExpressionHead, err_index, -1, 1);
 		DestroyStack(s);
 		return FAILED;
 	}
@@ -449,18 +366,6 @@ State computeValueFromPostfix(char *postfixExpression, double *value) {
 }
 
 
-int getLastCharIndex(char *infixExpression, int curr_index) {
-	char ch;
-	while(curr_index >= 0) {
-		ch = *(infixExpression + curr_index);
-		if (ch != '\0' && !isspace(ch))	
-			return curr_index;
-		curr_index--;
-	}
-	return -1;
-}
-
-
 int findRightBrace(char *infixExpression) {
 	infixExpression++;
 	int count = 1;
@@ -491,7 +396,7 @@ char *getNumber(char *infixExpression, char postfixExpression[], int *post_index
 }
 
 
-char *getLeftBrace(SequentialStackChar *s, char *infixExpression, char postfixExpression[], int *post_index) {
+char *findLeftBrace(SequentialStackChar *s, char *infixExpression, char postfixExpression[], int *post_index) {
 	char ch;
 	while (FAILED == StackEmpty(s) && SUCCEEDED == Pop(s, &ch)){
 		if (ch != '(') {
@@ -538,52 +443,6 @@ int isOperator(char ch) {
 }
 
 
-int getPrevCharIndex(char *infixExpressionHead, char *infixExpression, int curr_index) {
-	while(infixExpression!=infixExpressionHead && curr_index > -1){
-		if(!isspace(*infixExpression)) 
-			return curr_index;
-		curr_index--;
-		infixExpression--;
-	}
-	if(!isspace(*infixExpression)) return 0;
-	return FAILED;
-}
-
-
-char getPrevChar(char *infixExpression, char *infixExpressionHead) {
-	char ch;
-	if (infixExpressionHead == infixExpression){
-		return '!';
-	}
-	infixExpression--;
-	
-	do {
-		if (!isspace(ch = *infixExpression))	return ch;
-		infixExpression--;
-	}while(infixExpression != infixExpressionHead);
-	if (!isspace(ch = *infixExpression))	return ch;
-	return '!';
-}
-
-
-char getNextChar(char *infixExpression, int *next_index) {
-	char ch;
-	if ('\0' == infixExpression){
-		return '!';
-	}
-	infixExpression++;
-	(*next_index)++;
-	do {
-		if (!isspace(ch = *infixExpression))	
-			return ch;
-		infixExpression++;
-		(*next_index)++;
-	}while(*infixExpression != '\0');
-
-	if (!isspace(ch = *infixExpression))	
-		return ch;
-	return '!';
-}
 
 
 void printErrorIndex(char *infixExpression, int t1, int t2, int count) {

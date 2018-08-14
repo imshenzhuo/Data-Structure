@@ -21,7 +21,8 @@
 int main(int argc, const char * argv[]) {
     char properInfixExpressions[properTestNumbers][infixLength]= {
 		
-        "2-(5+5*4+3*2-1)/(27+3*1)","5",
+        "1--",
+        "2-(5+5*4+3*2-1)/(27+3*1)",
         "4*3+(10*4+6*2+8)/(52-2+10)-2",
         "3/2",
         "4 * 3 + ( 10 * 4 + 6 * 2 + 8) / ( 52       - 2 + 10 ) - 2",
@@ -407,7 +408,6 @@ int main(int argc, const char * argv[]) {
         printf("----------------------------------------------------------------\n\n");
     }
     printf("-----***   End of tests for NEW IMPROPER infix expressions.    ***-----\n\n\n");
-	getchar();
     return 0;
 }
 
