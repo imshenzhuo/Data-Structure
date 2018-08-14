@@ -12,8 +12,8 @@
 #define MaxSize 100
 typedef char ElemType;
 typedef double ElemTypeDouble;
-typedef enum state {FAILED, SUCCEEDED} State;   // State for stack operation
-
+//typedef enum state {FAILED, SUCCEEDED} State;   // State for stack operation
+typedef enum state {SUCCEEDED, FAILED} State;   // State for stack operation
 /*  Sequential stack to store char elements.
  */
 typedef struct {

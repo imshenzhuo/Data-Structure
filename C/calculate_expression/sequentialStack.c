@@ -121,7 +121,7 @@ State PushDouble(SequentialStackDouble *s, ElemTypeDouble e) {
     If the stack is empty, merely return FAILED to indicate an unsuccessful pop.
  */
 State PopDouble(SequentialStackDouble *s,ElemTypeDouble *e) {
-	if (StackEmptyDouble(s)) {
+	if (SUCCEEDED ==  StackEmptyDouble(s)) {
 		printf("Something wrong happened when we are popping a double from stack.\n");
 		printf("the stack is empty! Please check the stack.\n");
 		return FAILED;
@@ -134,7 +134,7 @@ State PopDouble(SequentialStackDouble *s,ElemTypeDouble *e) {
     If the stack is empty, merely return FAILED to indicate an unsuccessful gettop.
  */
 State GetTopDouble(SequentialStackDouble *s,ElemTypeDouble *e) {
-	if (StackEmptyDouble(s)) {
+	if (SUCCEEDED == StackEmptyDouble(s)) {
 		printf("Something wrong happened when we are get a char from stack.\n");
 		printf("the stack is empty! Please check the stack.\n");
 		return FAILED;

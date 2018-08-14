@@ -222,7 +222,7 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
 								return FAILED;
 							}
 							/* No abnormalities found, push the char */
-							if(!Push(s, ch)){	
+							if(FAILED == Push(s, ch)){	
 								return FAILED;
 							}
 							break;
@@ -244,13 +244,13 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
 									/* a digit immediately follows '+/-', which shows '+/-' is a unary operator */
 									if (ch == '-')	{
 										/* '$' represents unary '-' */
-										if(!Push(s, '$'))	{
+										if(FAILED == Push(s, '$'))	{
 											return FAILED;
 										}		
 									}
 									else {
 										/* '@' represents unary '+' */
-										if(!Push(s, '@'))	{
+										if(FAILED == Push(s, '@'))	{
 											return FAILED;
 										}
 									}
@@ -273,7 +273,7 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
 							}else {
 								/* pop the operators with the same priority or high priority */
 								PopPriority(postfixExpression, &post_index, s, ch);
-								if (!Push(s, ch)) {
+								if (FAILED == Push(s, ch)) {
 									return FAILED;
 								}
 								status = OPERATOR;
@@ -296,7 +296,7 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
 							}
 							/* pop the operators with the same priority or high priority */
 							PopPriority(postfixExpression, &post_index, s, ch);
-							if(!Push(s, ch)) {
+							if(FAILED == Push(s, ch)) {
 								return FAILED;
 							}	
 							status = OPERATOR;
@@ -350,7 +350,7 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
 	}
 
 	/* get the rest of char in the stack */
-	while (StackEmpty(s)!=1) {
+	while (StackEmpty(s) == FAILED) {
 		char ch;
 		Pop(s, &ch);
 		/* ch is not supposed to '(' */
@@ -400,23 +400,23 @@ State computeValueFromPostfix(char *postfixExpression, double *value) {
                 i = i * 10 + (*postfixExpression) - '0';
             }
             /* push every number */
-            if (!PushDouble(stack, i)) {
+            if (FAILED == PushDouble(stack, i)) {
 				return FAILED;
             }
         } else if(ch != '_' && ch != '@'){
         	/* skip space and '@' */
         	if (ch == '$'){
-        		if (!PopDouble(stack, &t1)) {
+        		if (FAILED == PopDouble(stack, &t1)) {
         			return FAILED;
         		}
-        		if (!PushDouble(stack, -1*t1)) {
+        		if (FAILED == PushDouble(stack, -1*t1)) {
         			return FAILED;
         		}
         	}else {
-        		if (!PopDouble(stack, &t1)) {
+        		if (FAILED == PopDouble(stack, &t1)) {
         			return FAILED;
         		}
-	            if (!PopDouble(stack, &t2)) {
+	            if (FAILED == PopDouble(stack, &t2)) {
 	            	return FAILED;
 	            }
 	            switch(ch) {
@@ -427,7 +427,7 @@ State computeValueFromPostfix(char *postfixExpression, double *value) {
 	            			 *value = t2 / t1;	break;
 	            	default: printf("error! \n"); return FAILED;
 	            }
-	            if (!PushDouble(stack,*value)) {
+	            if (FAILED == PushDouble(stack,*value)) {
 	            	return FAILED;
 	            }
         	}
@@ -435,7 +435,7 @@ State computeValueFromPostfix(char *postfixExpression, double *value) {
         postfixExpression++;
     }
     if(stack->top == 0){
-        if (!PopDouble(stack, value)) {
+        if (FAILED == PopDouble(stack, value)) {
         	return FAILED;
         }
     } else {
@@ -493,7 +493,7 @@ char *getNumber(char *infixExpression, char postfixExpression[], int *post_index
 
 char *getLeftBrace(SequentialStackChar *s, char *infixExpression, char postfixExpression[], int *post_index) {
 	char ch;
-	while (!StackEmpty(s) && Pop(s, &ch)){
+	while (FAILED == StackEmpty(s) && SUCCEEDED == Pop(s, &ch)){
 		if (ch != '(') {
 			postfixExpression[*post_index] = ch;
 			(*post_index)++;
@@ -508,7 +508,7 @@ char *getLeftBrace(SequentialStackChar *s, char *infixExpression, char postfixEx
 void PopPriority(char postfixExpression[], int *post_index, SequentialStackChar *s, char c) {
 	char ch;
 	if (c == '+' || c == '-') {
-		while(!StackEmpty(s)) {
+		while(FAILED == StackEmpty(s)) {
 			GetTop(s, &ch);
 			if (ch == '*' || ch == '/' || ch == '+' || ch == '-' || ch == '@' || ch == '$') {
 				postfixExpression[*post_index] = ch;
@@ -519,7 +519,7 @@ void PopPriority(char postfixExpression[], int *post_index, SequentialStackChar 
 			}
 		}
 	}else if (c == '*' || c == '/'){
-		while(!StackEmpty(s)) {
+		while(FAILED == StackEmpty(s)) {
 			GetTop(s, &ch);
 			if (ch == '*' || ch == '/' || ch == '@' || ch == '$') {
 				postfixExpression[*post_index] = ch;
@@ -608,7 +608,6 @@ void printErrorIndex(char *infixExpression, int t1, int t2, int count) {
 			else	
 				printf(" ");
 		}
-		
 		infixExpression++;
 		index++;
 	}
