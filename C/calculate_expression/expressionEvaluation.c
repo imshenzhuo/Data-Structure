@@ -19,6 +19,7 @@
 #define OPERATOR 1
 #define OPERAND  2
 
+
 /**
  * get a complete number from infixExpression and put it into postfixExpression
  * @Author   shenzhuo
@@ -81,13 +82,14 @@ void printErrorIndex(char *infixExpression, int t1, int t2, int count);
 
 /**
  * try to find matched right brace
+ * if true return 1
+ * else return 0
  * @Author   shenzhuo
  * @DateTime 2018-08-10T15:26:08+0800
  * @param    infixExpression          [description]
  * @return                            [description]
  */
 int findRightBrace(char *infixExpression);
-
 
 
 /**
@@ -109,10 +111,10 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
 		return FAILED;
 	}
 	InitStack(s);
-    char ch;
-    char prev_ch = '\0';                                        /* save prev char in infix expression */
+    char ch;                                                    /* save current char in infix expression */
+    char prev_ch = '\0';                                        /* save prev non space char in infix expression */
     int prev_index = -1;
-	while ( (ch = *infixExpression) != '\0') {							/*	for every char in infixExpression */
+	while ( (ch = *infixExpression) != '\0') {					/*	for every char in infixExpression */
         if (isdigit(ch)) {
 			if (status == OPERAND)	{							/*	the status should be OPERATOR, it means just getting a number 	*/
 				if (')' == prev_ch)								/*	a number immediately follows ')' in the expression.*/
@@ -177,7 +179,7 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
                                 }
                                 status = OPERATOR;
                                 break;
-							} else if (isOperator(prev_ch)) {
+							} else if (isOperator(prev_ch)) {    /*  the '+/-' immediately follows '+/-' */
                                 printf("Wrong expression!! Opreator '%c' immediately follows '%c' in the expression.\n", ch, prev_ch);
                                 printErrorIndex(infixExpressionHead, infix_index, prev_index, 2);
                                 DestroyStack(s);
@@ -199,9 +201,7 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
 								DestroyStack(s);
 								return FAILED;
 							}
-							/* two consecutive operators */
-							// if (status == OPERATOR){
-                            if (isOperator(prev_ch)) {
+                            if (isOperator(prev_ch)) {          /* two consecutive operators */
 								printf("Wrong expression!! Opreator '%c' immediately follows '%c' in the expression.\n", ch, prev_ch);
 								printErrorIndex(infixExpressionHead, infix_index, prev_index, 2);
 								DestroyStack(s);
@@ -260,8 +260,6 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
 	if (status == OPERATOR) {
 		/* status should be OPERAND, something wrong happened */
 		printf("Wrong expression!! No operand after the '%c' in the expression.\n", s->data[s->top]);
-		// int err_index = getLastCharIndex(infixExpressionHead, infix_index);
-		// printErrorIndex(infixExpressionHead, err_index, -1, 1);
 		DestroyStack(s);
 		return FAILED;
 	}
@@ -306,23 +304,19 @@ State computeValueFromPostfix(char *postfixExpression, double *value) {
     	return FAILED;
     }
     InitStackDouble(stack);
-
     while(*postfixExpression != '\0') { 	
         char ch = *postfixExpression;
-        if(isdigit(ch)) {
+        if(isdigit(ch)) {                                   /* push digit to stack */
             double i = ch - '0';
-            /* get the complete number */
-            while(isdigit(*(postfixExpression+1))){
+            while(isdigit(*(postfixExpression+1))) {        /* get the complete number */
                 postfixExpression++;
                 i = i * 10 + (*postfixExpression) - '0';
             }
-            /* push every number */
-            if (FAILED == PushDouble(stack, i)) {
+            if (FAILED == PushDouble(stack, i)) {           /* push every number */
 				return FAILED;
             }
-        } else if(ch != '_' && ch != '@'){
-        	/* skip space and '@' */
-        	if (ch == '$'){
+        } else if(ch != '_' && ch != '@'){                  /* skip space and '@' */
+        	if (ch == '$'){                                 /* unary operator */
         		if (FAILED == PopDouble(stack, &t1)) {
         			return FAILED;
         		}
@@ -341,7 +335,7 @@ State computeValueFromPostfix(char *postfixExpression, double *value) {
 	            	case '-': *value = t2 - t1; break;
 	            	case '*': *value = t2 * t1; break;
 	            	case '/': if(t1 == 0)	{	printf("Wrong expression!! Zero divisor!\n");	return FAILED;}
-	            			 *value = t2 / t1;	break;
+	            			  *value = t2 / t1;	break;
 	            	default: printf("error! \n"); return FAILED;
 	            }
 	            if (FAILED == PushDouble(stack,*value)) {
@@ -360,7 +354,6 @@ State computeValueFromPostfix(char *postfixExpression, double *value) {
 		DestroyStackDouble(stack);
     	return FAILED;
     }
-
     DestroyStackDouble(stack);
     return SUCCEEDED;
 }
@@ -378,7 +371,6 @@ int findRightBrace(char *infixExpression) {
 	}
 	return 0;
 }
-
 
 
 char *getNumber(char *infixExpression, char postfixExpression[], int *post_index, int *infix_index) {
@@ -441,8 +433,6 @@ void PopPriority(char postfixExpression[], int *post_index, SequentialStackChar 
 int isOperator(char ch) {
 	return ch == '+' || ch == '-' || ch == '*' || ch == '/';
 }
-
-
 
 
 void printErrorIndex(char *infixExpression, int t1, int t2, int count) {
