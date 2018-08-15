@@ -1,5 +1,5 @@
 /**
- * expressionEvaluation.c
+ *       expressionEvaluation.c
  * @Author   shenzhuo
  * @DateTime 2018-07-31T15:57:46+0800
  */
@@ -101,30 +101,30 @@ int findRightBrace(char *infixExpression);
  * @return                            [description]
  */
 State infixToPostfix(char *infixExpression,char postfixExpression[]) {
-	char *infixExpressionHead = infixExpression;				/*	save the point of infixExpression to infixExpressionHead	*/
-	int status = INIT;											/*	set the status to INIT 	*/
-	int infix_index = 0;
-	int post_index = 0;
-	SequentialStackChar *s = (SequentialStackChar *)malloc(sizeof(SequentialStackChar));			/*	initialization stack 	*/
-	if (s == NULL){
-		printf("Memory allocation failed.\n");
-		return FAILED;
-	}
-	InitStack(s);
+    char *infixExpressionHead = infixExpression;				/*	save the point of infixExpression to infixExpressionHead	*/
+    int status = INIT;											/*	set the status to INIT 	*/
+    int infix_index = 0;
+    int post_index = 0;
+    SequentialStackChar *s = (SequentialStackChar *)malloc(sizeof(SequentialStackChar));			/*	initialization stack 	*/
+    if (s == NULL){
+        printf("Memory allocation failed.\n");
+        return FAILED;
+    }
+    InitStack(s);
     char ch;                                                    /* save current char in infix expression */
     char prev_ch = '\0';                                        /* save prev non space char in infix expression */
     int prev_index = -1;
-	while ( (ch = *infixExpression) != '\0') {					/*	for every char in infixExpression */
+    while ( (ch = *infixExpression) != '\0') {                     /*	for every char in infixExpression */
         if (isdigit(ch)) {
-			if (status == OPERAND)	{							/*	the status should be OPERATOR, it means just getting a number 	*/
-				if (')' == prev_ch)								/*	a number immediately follows ')' in the expression.*/
-					printf("Wrong expression!! No operator between a number and ')'\n");
-				else											/*	two consecutive operands */
-					printf("Wrong expression!! No operator between two numbers.\n");
-				if (prev_index != -1)							/*	show the position of error */
-					printErrorIndex(infixExpressionHead, infix_index, prev_index, 2);
-				return FAILED;
-			}
+            if (status == OPERAND)	{                             /*	the status should be OPERATOR, it means just getting a number 	*/
+                if (')' == prev_ch)                                 /*	a number immediately follows ')' in the expression.*/
+                    printf("Wrong expression!! No operator between a number and ')'\n");
+                else                                                /*	two consecutive operands */
+                    printf("Wrong expression!! No operator between two numbers.\n");
+                if (prev_index != -1)                           /*	show the position of error */
+                    printErrorIndex(infixExpressionHead, infix_index, prev_index, 2);
+                return FAILED;
+            }
 			status = OPERAND;									/*	update the status and get the complete number */
 			infixExpression = getNumber(infixExpression, postfixExpression, &post_index, &infix_index);
 		} else {												/*	get the indexes and values of the prev_char and the next_char of ch */
