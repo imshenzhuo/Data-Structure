@@ -96,8 +96,7 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
                         break;
             case '+':
             case '-':   if (prev_ch == '(' || prev_ch == '\0') { 
-                            //start of the expression
-                            // unary operator
+                            //start of the expression, unary operator
                             if ( isspace(*(infixExpression+1)) ) {
                                 if ('-' == ch)  printf("Wrong expression!! A space follows a unary minus.\n");
                                 else    printf("Wrong expression!! A space follows a unary plus.\n");
@@ -157,16 +156,16 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
             
             default:    if (isdigit(ch)) {
                             postfixExpression[post_index++] = ch;
-                            if (')' == prev_ch) {                                /*  a number immediately follows ')' in the expression.*/
+                            if (')' == prev_ch) {           /*  a number immediately follows ')' in the expression.*/
                                 printf("Wrong expression!! No operator between a number and ')'\n");
                                 printErrorIndex(infixExpressionHead, infix_index, prev_index, 2);
                                 return FAILED;
                             }
-                            else if ( isdigit(prev_ch)) {                                                /*  two consecutive operands */
+                            else if (isdigit(prev_ch)) {    /*  two consecutive operands */
                                 printf("Wrong expression!! No operator between two numbers.\n");
                                 printErrorIndex(infixExpressionHead, infix_index, prev_index, 2);
                                 return FAILED;
-                            } else {
+                            } else {                        /* get consecutive digits  */
                                 while(isdigit(*(infixExpression+1))) {
                                     infix_index++;
                                     infixExpression++;
@@ -223,7 +222,7 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
  */
 State computeValueFromPostfix(char *postfixExpression, double *value) {
     /* check whether the postfixExpresion is empty.*/
-    if(strlen(postfixExpression)<=0) {
+    if (strlen(postfixExpression) <= 0) {
         printf("Wrong expression!! No operands in the expression!\n");
         return FAILED;
     }
@@ -235,9 +234,9 @@ State computeValueFromPostfix(char *postfixExpression, double *value) {
         return FAILED;
     }
     InitStackDouble(stack);
-    while(*postfixExpression != '\0') { 
+    while (*postfixExpression != '\0') { 
         char ch = *postfixExpression;
-        if(isdigit(ch)) {                                   /* push digit to stack */
+        if (isdigit(ch)) {                                   /* push digit to stack */
             double i = ch - '0';
             while(isdigit(*(postfixExpression+1))) {        /* get the complete number */
                 postfixExpression++;
@@ -259,14 +258,12 @@ State computeValueFromPostfix(char *postfixExpression, double *value) {
                               *value = t2 / t1;	break;
                     default:  printf("error! \n"); return FAILED;
                 }
-                if (FAILED == PushDouble(stack,*value))    return FAILED;
+                if (PushDouble(stack,*value) == FAILED)    return FAILED;
             }
         }
         postfixExpression++;
     }
-    if(stack->top == 0){
-        if (FAILED == PopDouble(stack, value))  return FAILED;
-    } else {
+    if (PopDouble(stack, value) == FAILED) {
         printf("Something wrong happened when we are poping value from stack.\n");
         DestroyStackDouble(stack);
         return FAILED;
