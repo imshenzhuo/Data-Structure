@@ -43,12 +43,13 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
     int infix_index = 0, post_index = 0, prev_index = -1, countBrace = 0;
     char ch;                                                    /* save current char in infix expression */
     char prev_ch = '\0';                                        /* save prev non space char in infix expression */
+    char tmp;
     while ( (ch = *infixExpression) != '\0') { 
         switch (ch) {
             case ' ':
             case '\t':  break;                                 /*   skip the space */
             case '(':   countBrace++;
-                        if ((isdigit(prev_ch)) ) {             /*   the '(' immediately follows a number */
+                        if (isdigit(prev_ch)) {             /*   the '(' immediately follows a number */
                             printf("Wrong expression!! No operator between a number and '('.\n");
                             printErrorIndex(infixExpressionHead, infix_index, prev_index, 2);
                             DestroyStack(s);
@@ -82,29 +83,27 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
                             return FAILED;
                         } else if (countBrace < 0){
                             printf("Wrong expression. No matched '(' before ')'\n");
-                            // printErrorIndex(infixExpressionHead, infix_index, prev_index, 2);
                             DestroyStack(s);
                             return FAILED;
                         }
                         // retrieve the char until '(' 
-                        char c;
-                        while( StackEmpty(s) == FAILED ) {
-                            Pop(s, &c);
-                            if (c == '(')   break;
-                            postfixExpression[post_index++] = c;
+                        while (StackEmpty(s) == FAILED) {
+                            Pop(s, &tmp);
+                            if (tmp == '(')   break;
+                            postfixExpression[post_index++] = tmp;
                         }
                         break;
             case '+':
             case '-':   if (prev_ch == '(' || prev_ch == '\0') { 
                             //start of the expression, unary operator
-                            if ( isspace(*(infixExpression+1)) ) {
+                            if (isspace(*(infixExpression+1)) ) {
                                 if ('-' == ch)  printf("Wrong expression!! A space follows a unary minus.\n");
                                 else    printf("Wrong expression!! A space follows a unary plus.\n");
                                 printErrorIndex(infixExpressionHead, infix_index, 0, 1);
                                 return FAILED;
                             }
                             if (ch == '-' && FAILED == Push(s, '$'))    return FAILED;  /* '$' represents unary '-' */
-                            else if ( FAILED == Push(s, '@') )          return FAILED;  /* '@' represents unary '+' */
+                            else if(ch == '+' && FAILED == Push(s, '@') )          return FAILED;  /* '@' represents unary '+' */
                         } else if (isOperator(prev_ch)) {    /*  the '+, -, *, /, ' immediately follows '+/-' */
                             // binary operator
                             printf("Wrong expression!! Opreator '%c' immediately follows '%c' in the expression.\n", ch, prev_ch);
@@ -113,7 +112,6 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
                             return FAILED;
                         } else {
                             /* pop the operators with the same priority or high priority */
-                            char tmp;
                             while(FAILED == StackEmpty(s)) {
                                 GetTop(s, &tmp);
                                 if ( isOperator(tmp)  || tmp == '@' || tmp == '$') {
@@ -141,7 +139,6 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
                             return FAILED;
                         }
                         /* pop the operators with the same priority or high priority */
-                        char tmp;
                         while(FAILED == StackEmpty(s)) {
                             GetTop(s, &tmp);
                             if (  tmp == '/' || tmp == '*'|| tmp == '@' || tmp == '$') {
