@@ -33,7 +33,7 @@ void printErrorIndex(char *infixExpression, int t1, int t2, int count);
  * @return                            State
  */
 State infixToPostfix(char *infixExpression,char postfixExpression[]) {
-    char *infixExpressionHead = infixExpression;				/*	save the point of infixExpression to print error message */
+    char *infixExpressionHead = infixExpression;                /*	save the point of infixExpression to print error message */
     SequentialStackChar *s = (SequentialStackChar *)malloc(sizeof(SequentialStackChar));
     if (s == NULL){
         printf("Memory allocation failed.\n");
@@ -46,14 +46,14 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
     while ( (ch = *infixExpression) != '\0') { 
         switch (ch) {
             case ' ':
-            case '\t':  break;								   /*	skip the space */
-			case '(':   countBrace++;
-                        if ((isdigit(prev_ch)) ) {			   /* 	the '(' immediately follows a number */
+            case '\t':  break;                                 /*   skip the space */
+            case '(':   countBrace++;
+                        if ((isdigit(prev_ch)) ) {             /*   the '(' immediately follows a number */
                             printf("Wrong expression!! No operator between a number and '('.\n");
                             printErrorIndex(infixExpressionHead, infix_index, prev_index, 2);
                             DestroyStack(s);
                             return FAILED;
-                        } else if (')'== prev_ch) {			   /* 	the '(' immediately follows '(' */
+                        } else if (')'== prev_ch) {            /*   the '(' immediately follows '(' */
                             printf("Wrong expression!! No operator between ')' and '('.\n");
                             printErrorIndex(infixExpressionHead, infix_index, prev_index, 2);
                             DestroyStack(s);
@@ -128,7 +128,7 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
                         }
                         break;
             case '*':
-            case '/':	/* '*' or '/' can not appear in the first */
+            case '/':   /* '*' or '/' can not appear in the first */
                         if (prev_ch == '\0' || '(' == prev_ch ) {
                             printf("Wrong expression!! No operand before the '%c'.\n", ch);
                             printErrorIndex(infixExpressionHead,infix_index,-1,1);
@@ -223,19 +223,19 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
  */
 State computeValueFromPostfix(char *postfixExpression, double *value) {
     /* check whether the postfixExpresion is empty.*/
-    if(strlen(postfixExpression)<=0)	{
+    if(strlen(postfixExpression)<=0) {
         printf("Wrong expression!! No operands in the expression!\n");
         return FAILED;
     }
     *value = 0;
     double t1, t2;
     SequentialStackDouble* stack = (SequentialStackDouble *)malloc(sizeof(SequentialStackDouble));
-    if (stack == NULL)	{
+    if (stack == NULL) {
         printf("Memory allocation failed.\n");
         return FAILED;
     }
     InitStackDouble(stack);
-    while(*postfixExpression != '\0') { 	
+    while(*postfixExpression != '\0') { 
         char ch = *postfixExpression;
         if(isdigit(ch)) {                                   /* push digit to stack */
             double i = ch - '0';
@@ -252,10 +252,10 @@ State computeValueFromPostfix(char *postfixExpression, double *value) {
                 if (FAILED == PopDouble(stack, &t1))      return FAILED;
                 if (FAILED == PopDouble(stack, &t2))      return FAILED;
                 switch(ch) {
-                    case '+': *value = t1 + t2;	break;
+                    case '+': *value = t1 + t2; break;
                     case '-': *value = t2 - t1; break;
                     case '*': *value = t2 * t1; break;
-                    case '/': if(t1 == 0)	{	printf("Wrong expression!! Zero divisor!\n");	return FAILED;}
+                    case '/': if(t1 == 0)   {   printf("Wrong expression!! Zero divisor!\n");   return FAILED;}
                               *value = t2 / t1;	break;
                     default:  printf("error! \n"); return FAILED;
                 }
@@ -286,13 +286,13 @@ void printErrorIndex(char *infixExpression, int t1, int t2, int count) {
     int index = 0;
     while(*infixExpression != '\0'){
         if (count == 1){
-            if (index == t1)	                printf("^");
-            else if(*infixExpression == '\t')	printf("\t");
+            if (index == t1)                    printf("^");
+            else if(*infixExpression == '\t')   printf("\t");
             else                                printf(" ");
         } else if(count == 2){
-            if (index == t1 || index == t2)		printf("^");
-            else if(*infixExpression == '\t')	printf("\t");
-            else	                			printf(" ");
+            if (index == t1 || index == t2)     printf("^");
+            else if(*infixExpression == '\t')   printf("\t");
+            else                                printf(" ");
         }
         infixExpression++;
         index++;
