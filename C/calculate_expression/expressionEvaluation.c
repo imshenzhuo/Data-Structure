@@ -49,7 +49,7 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
             case ' ':
             case '\t':  break;                                 /*   skip the space */
             case '(':   countBrace++;
-                        if (isdigit(prev_ch)) {             /*   the '(' immediately follows a number */
+                        if (isdigit(prev_ch)) {                 /*   the '(' immediately follows a number */
                             printf("Wrong expression!! No operator between a number and '('.\n");
                             printErrorIndex(infixExpressionHead, infix_index, prev_index, 2);
                             DestroyStack(s);
@@ -60,7 +60,7 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
                             DestroyStack(s);
                             return FAILED;
                         }
-                        /* No abnormalities found, push the char */
+                        /* proper -> No abnormalities found, push the char */
                         if (Push(s, ch) == FAILED)   return FAILED;
                         break;
             case ')':   countBrace--;
@@ -86,7 +86,7 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
                             DestroyStack(s);
                             return FAILED;
                         }
-                        // retrieve the char until '(' 
+                        // proper -> retrieve the char until '(' 
                         while (StackEmpty(s) == FAILED) {
                             Pop(s, &tmp);
                             if (tmp == '(')   break;
@@ -102,16 +102,18 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
                                 printErrorIndex(infixExpressionHead, infix_index, 0, 1);
                                 return FAILED;
                             }
+                            /* proper -> save unary operator */
                             if (ch == '-' && FAILED == Push(s, '$'))    return FAILED;  /* '$' represents unary '-' */
                             else if(ch == '+' && FAILED == Push(s, '@') )          return FAILED;  /* '@' represents unary '+' */
-                        } else if (isOperator(prev_ch)) {    /*  the '+, -, *, /, ' immediately follows '+/-' */
-                            // binary operator
-                            printf("Wrong expression!! Opreator '%c' immediately follows '%c' in the expression.\n", ch, prev_ch);
-                            printErrorIndex(infixExpressionHead, infix_index, prev_index, 2);
-                            DestroyStack(s);
-                            return FAILED;
                         } else {
-                            /* pop the operators with the same priority or high priority */
+                            // binary operator
+                            if (isOperator(prev_ch)) {    /*  the '+, -, *, /, ' immediately follows '+/-' */
+                                printf("Wrong expression!! Opreator '%c' immediately follows '%c' in the expression.\n", ch, prev_ch);
+                                printErrorIndex(infixExpressionHead, infix_index, prev_index, 2);
+                                DestroyStack(s);
+                                return FAILED;
+                            }
+                            /* proper -> pop the operators with the same priority or high priority */
                             while(FAILED == StackEmpty(s)) {
                                 GetTop(s, &tmp);
                                 if ( isOperator(tmp)  || tmp == '@' || tmp == '$') {
@@ -138,7 +140,7 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
                             DestroyStack(s);
                             return FAILED;
                         }
-                        /* pop the operators with the same priority or high priority */
+                        /* proper -> pop the operators with the same priority or high priority */
                         while(FAILED == StackEmpty(s)) {
                             GetTop(s, &tmp);
                             if (  tmp == '/' || tmp == '*'|| tmp == '@' || tmp == '$') {
@@ -162,15 +164,15 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
                                 printf("Wrong expression!! No operator between two numbers.\n");
                                 printErrorIndex(infixExpressionHead, infix_index, prev_index, 2);
                                 return FAILED;
-                            } else {                        /* get consecutive digits  */
-                                while(isdigit(*(infixExpression+1))) {
-                                    infix_index++;
-                                    infixExpression++;
-                                    ch = *infixExpression;
-                                    postfixExpression[post_index++] = ch;
-                                }
-                                postfixExpression[post_index++] = '_';
                             }
+                            /* proper -> get consecutive digits  */
+                            while(isdigit(*(infixExpression+1))) {
+                                infix_index++;
+                                infixExpression++;
+                                ch = *infixExpression;
+                                postfixExpression[post_index++] = ch;
+                            }
+                            postfixExpression[post_index++] = '_';
                         } else {
                             printf("Wrong expression!! Illegal character '%c' in the expression.\n", ch); 
                             DestroyStack(s); 
