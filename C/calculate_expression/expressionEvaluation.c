@@ -199,7 +199,7 @@ State infixToPostfix(char *infixExpression,char postfixExpression[]) {
         DestroyStack(s);
         return FAILED;
     }
-    /* get the rest of char in the stack */
+    /* proper -> get the rest of char in the stack */
     while (StackEmpty(s) == FAILED) {
         char ch;
         Pop(s, &ch);
