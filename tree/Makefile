@@ -5,8 +5,8 @@ files = BinarySearchTree
 
 all: $(files)
 
-BinarySearchTree: BinarySearchTree.cpp
-	$(cc) $(cflags) -o BinarySearchTree BinarySearchTree.cpp
+BinarySearchTree: BinarySearchTree.cpp BinarySearchTreeTest.cpp
+	$(cc) $(cflags) -o BinarySearchTree BinarySearchTree.cpp BinarySearchTreeTest.cpp
 
 clean:
 	rm -rf *.out *~ *.o BinarySearchTree
