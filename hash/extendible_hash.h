@@ -22,6 +22,7 @@ namespace cmudb {
 
 template <typename K, typename V>
 class ExtendibleHash : public HashTable<K, V> {
+  
   struct Bucket {
     explicit Bucket(int depth):localDepth(depth) {};
     int localDepth;
@@ -49,7 +50,9 @@ private:
   int getBucketIndex(const K &key) const;
 
   int globalDepth;
+  // 桶的大小也就是M, 一般是磁盘块存储数据的个数
   size_t bucketMaxSize;
+  // 当前桶的数量
   int numBuckets;
   
   std::vector<std::shared_ptr<Bucket>> bucketTable;

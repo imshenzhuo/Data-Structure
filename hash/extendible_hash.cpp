@@ -40,7 +40,10 @@ int ExtendibleHash<K, V>::GetGlobalDepth() const {
  */
 template <typename K, typename V>
 int ExtendibleHash<K, V>::GetLocalDepth(int bucket_id) const {
-  if (!bucketTable[bucket_id] || bucketTable[bucket_id]->items.empty()) return -1;
+  if (bucket_id >= bucketTable.size())
+    return -1;
+  if (!bucketTable[bucket_id] || bucketTable[bucket_id]->items.empty()) 
+    return -1;
   return bucketTable[bucket_id]->localDepth;
 }
 
@@ -104,12 +107,14 @@ void ExtendibleHash<K, V>::Insert(const K &key, const V &value) {
   auto index = getBucketIndex(key);
   std::shared_ptr<Bucket> targetBucket = bucketTable[index];
 
+  // bucket满了 分裂
   while (targetBucket->items.size() == bucketMaxSize) {
-    int flag = 0;
+    // directory要翻倍 D+1
     if (targetBucket->localDepth == globalDepth) {
-      flag = 1;
       size_t length = bucketTable.size();
       for (size_t i = 0; i < length; i++) {
+        // 此处新增的位数并不是在原有的D位append, 而是在前面
+        // 联系后面的mask变量不难理解
         bucketTable.push_back(bucketTable[i]);
       }
       globalDepth++;
@@ -126,12 +131,8 @@ void ExtendibleHash<K, V>::Insert(const K &key, const V &value) {
         zeroBucket->items.insert(item);
       }
     }
-    int c = 0;
-    int cc = 0;
     for (size_t i = 0; i < bucketTable.size(); i++) {
       if (bucketTable[i] == targetBucket) {
-        if (flag) c++;
-        else cc++;
         if (i & mask) {
           bucketTable[i] = oneBucket;
         } else {
@@ -139,9 +140,6 @@ void ExtendibleHash<K, V>::Insert(const K &key, const V &value) {
         }
       }
     }
-    if (flag) std::cout << "********c is " << c << std::endl;
-    else  std::cout << "+++++cc is " << cc << std::endl;
-
     index = getBucketIndex(key);
     targetBucket = bucketTable[index];
   } //end while
