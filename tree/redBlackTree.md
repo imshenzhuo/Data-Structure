@@ -33,6 +33,8 @@
 - 没有右红链接
 - 没有连续的两个左红链接
 
+#### 核心
+
 1. 左旋转
 2. 右旋转
 
@@ -55,4 +57,7 @@ Node* insert(Node *cur, Key k, Value v) {
     return cur;
 }
 ```
+
+## TODO
+剩余红黑树的删除
 
